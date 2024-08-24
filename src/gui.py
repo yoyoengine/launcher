@@ -5,23 +5,27 @@
     Licensed under the MIT license. See LICENSE file in the project root for details.
 """
 
-# Creating GUI's in python is miserable, and I dont even want to mess with
-# it right now.
-
 import tkinter as tk
 from tkinter import ttk, Frame
+from desktop_notifier import DesktopNotifier, Icon
+
+import asyncio
 
 import sv_ttk
 
 import backend
 
+
 class YoyoEngineHub:
     def __init__(self, version):
+
+        self.notifier = DesktopNotifier()
+        # asyncio.run(self.notifier.send(title="YoyoEngine Hub", message="Welcome to YoyoEngine Hub!", icon="../media/cleanlogo.png"))
+
         self.root = tk.Tk()
         self.root.geometry("1280x720")
         self.root.title("YoyoEngine Hub")
-        # self.root.iconbitmap("yoyoengine.ico")
-        # self.root.tk.call('wm', 'iconphoto', self.root._w, tk.PhotoImage(file='cleanlogo.png'))
+        self.root.tk.call('wm', 'iconphoto', self.root._w, tk.PhotoImage(file='../media/cleanlogo.png'))
 
         self.tab = "editors"
 
@@ -75,38 +79,73 @@ class YoyoEngineHub:
 
     def hub(self):
         self.clear()
-
+    
+        # Configure root window grid
         self.root.columnconfigure(0, weight=1)  # Sidebar column (20% width)
-        self.root.columnconfigure(1, weight=4)  # Main content column (80% width)
-        # self.root.rowconfigure(1, weight=1)  # Make the content area expandable
+        self.root.columnconfigure(1, weight=20)  # Main content column (80% width)
+        self.root.rowconfigure(0, weight=0)  # Top bar row
+        self.root.rowconfigure(1, weight=1)  # Main content row
+    
+        # Top bar container
+        self.top_bar = tk.Frame(self.root)
+        self.top_bar.grid(row=0, column=0, columnspan=2, sticky="ew")
+        self.top_bar.columnconfigure(0, weight=1)
+    
+        # Logo image in the top bar
+        self.logo = tk.PhotoImage(file="../media/smallesttextlogo.png")
+        self.logo_label = tk.Label(self.top_bar, image=self.logo)
+        self.logo_label.grid(row=0, column=0, pady=0, padx=10, sticky="nw")
+    
+        # Left menu container
+        self.left_menu = tk.Frame(self.root)
+        self.left_menu.grid(row=1, column=0, sticky="nsew")
+        self.left_menu.columnconfigure(0, weight=1)  # Ensure buttons fill the width
+        self.left_menu.rowconfigure(2, weight=1)  # Ensure bottom labels are aligned to the bottom
+    
+        def open_editors():
+            self.tab = "editors"
+            self.clear()
+            self.hub()
+        
+        def open_settings():
+            self.tab = "settings"
+            self.clear()
+            self.hub()
 
-        # make it so the first row is only as tall as the logo
-        self.root.grid_rowconfigure(0, minsize=50)
-        self.root.grid_rowconfigure(0, weight=0)
-
-        # logo image up top
-        self.logo = tk.PhotoImage(file="../media/smalltextlogo.png")
-        self.logo_label = tk.Label(self.root, image=self.logo)
-        self.logo_label.grid(row=0, column=0, columnspan=2, pady=0, padx=10, sticky="nw")
-
-        # Make the sidebar rows and columns fill the available space
-        self.root.grid_rowconfigure(1, weight=0)
-        self.root.grid_rowconfigure(2, weight=0)
-        self.root.grid_rowconfigure(3, weight=1)  # Make the last row expandable
-
-        # sidebar buttons
-        self.editors_btn = ttk.Button(self.root, text="Editors")
-        self.editors_btn.grid(row=1, column=0, pady=1, padx=20, sticky="nsew")
-
-        self.settings_btn = ttk.Button(self.root, text="Settings")
-        self.settings_btn.grid(row=2, column=0, pady=20, padx=20, sticky="nsew")
-
-
+        # Sidebar buttons in the left menu
+        if(self.tab == "editors"):
+            self.editors_btn = ttk.Button(self.left_menu, text="Editors", state="disabled")
+            self.editors_btn.grid(row=0, column=0, pady=1, padx=20, sticky="nsew")
+            self.settings_btn = ttk.Button(self.left_menu, text="Settings", command=open_settings)
+            self.settings_btn.grid(row=1, column=0, pady=20, padx=20, sticky="nsew")
+        elif (self.tab == "settings"):
+            self.editors_btn = ttk.Button(self.left_menu, text="Editors", command=open_editors)
+            self.editors_btn.grid(row=0, column=0, pady=1, padx=20, sticky="nsew")
+            self.settings_btn = ttk.Button(self.left_menu, text="Settings", state="disabled")
+            self.settings_btn.grid(row=1, column=0, pady=20, padx=20, sticky="nsew")
+    
         # Main content area
         self.content_frame = tk.Frame(self.root, bg="#171617")
-        self.content_frame.grid(row=1, column=1, rowspan=3, sticky="nsew", pady=(0, 0))
-
-        if(self.tab == "editors"):
+        self.content_frame.grid(row=1, column=1, sticky="nsew", pady=(0, 0))
+    
+        # Copyright label
+        self.copyright_label = tk.Label(self.left_menu, text="Ryan Zmuda © 2024")
+        self.copyright_label.grid(row=3, column=0, pady=(0, 5), padx=20, sticky="sew")
+    
+        self.copyright_label = tk.Label(self.left_menu, text="Licensed under the MIT license.")
+        self.copyright_label.grid(row=4, column=0, pady=(0, 5), padx=20, sticky="sew")
+    
+        def report_problem():
+            # open issues in browser for yoyoengine/launcher
+            import webbrowser
+            webbrowser.open("https://github.com/yoyoengine/launcher/issues")
+    
+        # Report problem label
+        self.report_label = tk.Label(self.left_menu, text="Report a problem", fg="cyan", cursor="hand2")
+        self.report_label.grid(row=5, column=0, pady=(0, 20), padx=30, sticky="sew")
+        self.report_label.bind("<Button-1>", lambda e: report_problem())
+    
+        if self.tab == "editors":
             pass
         else:
             pass

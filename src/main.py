@@ -9,7 +9,8 @@
 
 from gui import YoyoEngineHub
 
-VERSION = "build 0"
+# semver for hub
+VERSION = "v1.0.0"
 
 # HEADER = '\033[95m'
 # OKBLUE = '\033[94m'
