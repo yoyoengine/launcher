@@ -5,7 +5,9 @@
     Licensed under the MIT license. See LICENSE file in the project root for details.
 """
 
+import io
 import os
+import tarfile
 import requests
 import json
 
@@ -18,22 +20,15 @@ class YoyoEngineHubBackend:
         self.platform = detect_platform()
         self.version = version
 
-        # self.api_url = "https://api.github.com/repos/yoyoengine/launcher"
-        self.api_url = "https://api.github.com/repos/zoogies/Boneworks-Save-Manager"
+        # self.engine_api_url = "https://api.github.com/repos/yoyoengine/launcher"
+        self.engine_api_url = "https://api.github.com/repos/zoogies/Boneworks-Save-Manager"
+        # self.hub_api_url = "https://api.github.com/repos/yoyoengine/launcher"
+        self.hub_api_url = "https://api.github.com/repos/zoogies/Boneworks-Save-Manager"
 
-    # def create_yoyoengine_dirs(self):
-
-    """
-        A little bit compilcated, since we only want to check for an update
-        for the hub.
-
-        I'm leaning towards every single build we release updates the whole
-        stack of yoyoengine software, since they are all so tightly integrated.
-    """
     def check_for_hub_update(self) -> bool:
         # check the most recent release of yoyoengine and get its tag
         # compare the tag to the current version of the hub (ex: build 0 vs build 1)
-        res = json.loads(requests.get(f"{self.api_url}/releases").text)
+        res = json.loads(requests.get(f"{self.hub_api_url}/releases").text)
         latest_release_tag = res[0]['tag_name']
 
         if latest_release_tag != self.version:
@@ -57,6 +52,17 @@ class YoyoEngineHubBackend:
         if not os.path.exists(path):
             os.makedirs(path)
 
+    def check_remote_versions(self):
+        # get all releases
+        res = json.loads(requests.get(f"{self.engine_api_url}/releases").text)
+        versions = []
+        for release in res:
+            versions.append({
+                "version": release['tag_name'],
+                "url": release['html_url'],
+                "date": release['published_at']
+            })
+        return versions
 
     def check_installed_versions(self):
         if self.platform == "Linux":
@@ -78,15 +84,53 @@ class YoyoEngineHubBackend:
                         "path": dir_path
                     })
             return versions
-# # function which uses the github API to get a list of all releases for zoogies/yoyoengine
-# def get_releases():
-#     import requests
-#     import json
+        
+    def install_by_tag(self, tag):
+        print(f"Installing version {tag}")
 
-#     url = "https://api.github.com/repos/zoogies/yoyoengine/releases"
-#     response = requests.get(url)
-#     releases = json.loads(response.text)
-#     return releases
+        """
+            Each yoyoengine release has files following this pattern:
+
+            yoyoeditor-build**-linux-amd64.tar.gz
+        
+            we just need to download that and extract it into the editors directory
+        """
+        res = json.loads(requests.get(f"{self.engine_api_url}/releases/tags/{tag}").text)
+        assets = res['assets']
+        for asset in assets:
+            if "yoyoeditor-build" in asset['name'] and self.platform in asset['name']:
+                download_url = asset['browser_download_url']
+                break
+
+        # Define the path for the extraction
+        editors_dir = os.path.expanduser("~/.local/share/yoyoengine/editors")
+        tag_dir = os.path.join(editors_dir, tag)
+
+        # Ensure the tag directory exists
+        os.makedirs(tag_dir, exist_ok=True)
+
+        # Download the tarball
+        # r = requests.get(download_url)
+        r = requests.get("https://api.github.com/repos/zoogies/Boneworks-Save-Manager/tarball/v1.0")
+        tar = tarfile.open(fileobj=io.BytesIO(r.content))
+        
+        try:
+            # Extract the tarball into the tag directory
+            tar.extractall(path=tag_dir)
+        finally:
+            tar.close()
+
+        print(f"Version {tag} installed successfully in {tag_dir}")
+
+    # this is taking in the dict we give earlier, that has a path key
+    def open_editor(self, version):
+        # create a completely new proc to run the editor
+        import subprocess
+        subprocess.Popen([f"{version['path']}/yoyoeditor"], shell=True)
+
+    def uninstall_editor(self, version):
+        import shutil
+        shutil.rmtree(version['path'])
 
 """
     Spec:

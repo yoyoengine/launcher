@@ -24,3 +24,16 @@ Build final output:
 ```bash
 pyinstaller --onefile --collect-data sv_ttk src/main.py
 ```
+
+## stipulations
+
+yoyoeditor build releases are expected to have a yoyoeditor**.tar.gz file in the assets, which is what should be actually installed into the new directory.
+
+yoyoeditor builds are not nested in a subdir, if you extract, yoyoeditor is at the root
+
+## todo
+
+add settings page to cleanup all installs
+some kinda menu that shows during install, uninstall to show progress
+maybe replace the hub update available since its trash
+add github cicd to build hub

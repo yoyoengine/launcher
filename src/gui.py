@@ -10,18 +10,53 @@ from tkinter import ttk
 import sv_ttk
 import webbrowser
 from backend import YoyoEngineHubBackend
-from desktop_notifier import DesktopNotifier
+from desktop_notifier import DesktopNotifier, Icon
+from desktop_notifier.sync import DesktopNotifierSync
+
+import asyncio
+
+from datetime import datetime, timezone
+from dateutil import parser
+from dateutil.relativedelta import relativedelta
+
+def time_ago(timestamp_str):
+    # Parse the timestamp string
+    timestamp = parser.isoparse(timestamp_str)
+    now = datetime.now(timezone.utc)  # Make `now` timezone-aware
+
+    # Calculate the difference
+    delta = relativedelta(now, timestamp)
+
+    # Format the difference
+    if delta.years > 0:
+        return f"{delta.years} years ago"
+    elif delta.months > 0:
+        return f"{delta.months} months ago"
+    elif delta.days > 0:
+        return f"{delta.days} days ago"
+    elif delta.hours > 0:
+        return f"{delta.hours} hours ago"
+    elif delta.minutes > 0:
+        return f"{delta.minutes} minutes ago"
+    else:
+        return "just now"
 
 class YoyoEngineHub:
     def __init__(self, version):
-        self.notifier = DesktopNotifier()
+        self.notifier = DesktopNotifierSync(app_name="YoyoEngine Hub")
         self.root = tk.Tk()
         self.root.geometry("1280x720")
         self.root.title("YoyoEngine Hub")
         self.root.tk.call('wm', 'iconphoto', self.root._w, tk.PhotoImage(file='../media/cleanlogo.png'))
         self.tab = "editors"
         self.backend = YoyoEngineHubBackend(version)
-        self.update_available = self.backend.check_for_hub_update()
+
+        try:
+            self.update_available = self.backend.check_for_hub_update()
+        except Exception as e:
+            self.update_available = False
+
+        self.version_logo = tk.PhotoImage(file="../media/smallcleanlogo.png")
 
         if self.update_available:
             self.show_update_notification()
@@ -31,7 +66,6 @@ class YoyoEngineHub:
                 self.show_platform_error()
             else:
                 self.hub()
-                print(self.backend.check_installed_versions())
 
     def show_update_notification(self):
         url = "https://github.com/yoyoengine/launcher/releases/latest"
@@ -138,7 +172,7 @@ class YoyoEngineHub:
         self.content_frame = tk.Frame(self.root, bg="#171617")
         self.content_frame.grid(row=1, column=1, sticky="nsew", pady=(0, 0))
 
-        self.canvas = tk.Canvas(self.content_frame, bg="#171617")
+        self.canvas = tk.Canvas(self.content_frame, bg="#171617", highlightthickness=0)
         self.scrollbar = ttk.Scrollbar(self.content_frame, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
@@ -166,13 +200,121 @@ class YoyoEngineHub:
         self.canvas.bind_all("<Button-4>", on_mouse_wheel_linux)
         self.canvas.bind_all("<Button-5>", on_mouse_wheel_linux)
 
-    def populate_editors_tab(self):
+    def trim_version(self, version):
+        return version.replace('_', ' ').replace('-', ' ')
+
+    def populate_available_editors(self):
+        # big text that says "Available:"
+        available_label = tk.Label(self.scrollable_frame, text="Available:", bg="#171617", fg="white", font=("Roboto", 18))
+        available_label.pack(fill="x", pady=10)
+
+        try:
+            remote_versions = self.backend.check_remote_versions()
+            installed_versions = self.backend.check_installed_versions()
+        except Exception as e:
+            print("an exception has occurred:",e)
+            remote_versions = []
+            installed_versions = []
+
+        # prune from remote_versions any versions that are already installed
+        for installed_version in installed_versions:
+            for remote_version in remote_versions:
+                if installed_version['version'] == remote_version['version']:
+                    remote_versions.remove(remote_version)
+
+        if len(remote_versions) == 0:
+            no_versions_label = tk.Label(self.scrollable_frame, text="No yoyoengine releases detected!", bg="#171617", fg="orange", font=("Roboto", 16))
+            no_versions_label.pack(fill="x", pady=10)
+        else:
+            for version in remote_versions:
+                version_frame = tk.Frame(self.scrollable_frame, bg="#1d1c1d", padx=10, pady=10)
+                version_frame.pack(fill="x", pady=5)
+
+                # Logo image label
+                self.logo_label = tk.Label(version_frame, image=self.version_logo)
+                self.logo_label.pack(side="left", padx=5)
+                
+                # Details frame to hold version details
+                details_frame = tk.Frame(version_frame, bg="#1d1c1d")
+                details_frame.pack(side="left", fill="x", expand=True)
+                
+                # Title label
+                version_label = tk.Label(details_frame, text=f"{self.trim_version(version['version'])}", bg="#1d1c1d", fg="white", font=("Roboto", 16))
+                version_label.pack(side="top", anchor="w")
+                
+                # Time ago label
+                time_ago_label = tk.Label(details_frame, text=f"released {time_ago(version['date'])}", bg="#1d1c1d", fg="gray", font=("Roboto", 10))
+                time_ago_label.pack(side="top", anchor="w")
+                
+                # Buttons frame
+                buttons_frame = tk.Frame(details_frame, bg="#1d1c1d")
+                buttons_frame.pack(side="top", anchor="w", pady=5)
+                
+                def install_handler(tag):
+                    self.backend.install_by_tag(tag)
+                    # asyncio.run(
+                    self.notifier.send("YoyoEngine Hub", f"Editor: {version['version']} has been installed.", icon=Icon(name="../media/smallcleanlogo.png"))
+                    # )
+                    self.clear()
+                    self.hub()
+
+                install_button = ttk.Button(buttons_frame, text="Install", command=lambda version=version['version']: install_handler(version))
+                install_button.pack(side="left", padx=5)
+                
+                release_notes_button = ttk.Button(buttons_frame, text="Release Notes", command=lambda url=version['url']: webbrowser.open(url))
+                release_notes_button.pack(side="left", padx=5)
+
+    def populate_installed_editors(self):
+        # big text that says "Installed:"
+        installed_label = tk.Label(self.scrollable_frame, text="Installed:", bg="#171617", fg="white", font=("Roboto", 18))
+        installed_label.pack(fill="x", pady=10)
+
         versions = self.backend.check_installed_versions()
-        for version in versions:
-            version_frame = tk.Frame(self.scrollable_frame, bg="#282828", padx=10, pady=10)
-            version_frame.pack(fill="x", pady=5)
-            version_label = tk.Label(version_frame, text=f"Version: {version}", bg="#282828", fg="white")
-            version_label.pack(side="left", fill="x", expand=True)
+
+        if len(versions) == 0:
+            no_versions_label = tk.Label(self.scrollable_frame, text="No yoyoengine installations detected!", bg="#171617", fg="orange", font=("Roboto", 16))
+            no_versions_label.pack(fill="x", pady=10)
+        else:
+            for version in versions:
+                version_frame = tk.Frame(self.scrollable_frame, bg="#1d1c1d", padx=10, pady=10)
+                version_frame.pack(fill="x", pady=5)
+
+                # Logo image label
+                self.logo_label = tk.Label(version_frame, image=self.version_logo)
+                self.logo_label.pack(side="left", padx=5)
+                
+                # Details frame to hold version details
+                details_frame = tk.Frame(version_frame, bg="#1d1c1d")
+                details_frame.pack(side="left", fill="x", expand=True)
+                
+                # Title label
+                version_label = tk.Label(details_frame, text=f"{self.trim_version(version['version'])}", bg="#1d1c1d", fg="white", font=("Roboto", 16))
+                version_label.pack(side="top", anchor="w")
+                
+                # Buttons frame
+                buttons_frame = tk.Frame(details_frame, bg="#1d1c1d")
+                buttons_frame.pack(side="top", anchor="w", pady=5)
+                
+                install_button = ttk.Button(buttons_frame, text="Open", command=lambda version=version: self.backend.open_editor(version))
+                install_button.pack(side="left", padx=5)
+                
+                release_notes_button = ttk.Button(buttons_frame, text="Docs", command=lambda url="https://zoogies.github.io/yoyoengine/": webbrowser.open(url))
+                release_notes_button.pack(side="left", padx=5)
+
+                def handle_uninstall(version):
+                    self.backend.uninstall_editor(version)
+                    # asyncio.run(
+                    self.notifier.send("YoyoEngine Hub", f"Editor: {version['version']} has been uninstalled.", icon=Icon(name="../media/smallcleanlogo.png"))
+                    # )
+                    self.clear()
+                    self.hub()
+
+                uninstall_button = ttk.Button(buttons_frame, text="Uninstall", command=lambda version=version: handle_uninstall(version))
+                uninstall_button.pack(side="left", padx=5)
+
+    def populate_editors_tab(self):
+        self.populate_installed_editors()
+        self.populate_available_editors()
 
     def clear(self):
         for widget in self.root.winfo_children():
