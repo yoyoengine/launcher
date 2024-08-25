@@ -55,3 +55,9 @@ Make sure you run from outside the source dir, with `--dev` as a cli arg to `mai
 ```bash
 python src/main.py --dev
 ```
+
+## Building the flatpak from source
+
+1. Aquire [flatpak-pip-generator](https://github.com/flatpak/flatpak-builder-tools/blob/master/pip/flatpak-pip-generator)
+2. Run `python3 flatpak-pip-generator --requirements-file=requirements.txt`
+3. Run `flatpak-builder --force-clean --user --install-deps-from=flathub --repo=repo --install builddir live.zoogies.yoyoengine-hub.yaml`

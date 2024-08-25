@@ -1,4 +1,4 @@
-tkinter
-sv_ttk
-pyinstaller
-desktop_notifier
+tk==0.1.0
+desktop-notifier==5.0.1
+pyinstaller==6.10.0
+sv-ttk==2.6.0

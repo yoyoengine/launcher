@@ -1,0 +1,88 @@
+{
+    "name": "python3-requirements",
+    "buildsystem": "simple",
+    "build-commands": [],
+    "modules": [
+        {
+            "name": "python3-tk",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"tk==0.1.0\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/1e/0b/029cbdb868bb555fed99bf6540fff072d500b3f895873709f25084e85e33/tk-0.1.0-py3-none-any.whl",
+                    "sha256": "703a69ff0d5ba2bd2f7440582ad10160e4a6561595d33457dc6caa79b9bf4930"
+                }
+            ]
+        },
+        {
+            "name": "python3-desktop-notifier",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"desktop-notifier==5.0.1\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/d2/fc/c0a3f4c4eaa5a22fbef91713474666e13d0ea2a69c84532579490a9f2cc8/dbus_next-0.2.3-py3-none-any.whl",
+                    "sha256": "58948f9aff9db08316734c0be2a120f6dc502124d9642f55e90ac82ffb16a18b"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/32/87/b8e4235df77cd20cea70e46ff82e99abc1573ddf8f1156f9fec5d86f37b8/desktop_notifier-5.0.1-py3-none-any.whl",
+                    "sha256": "eacfd923fd6fd21daede6de6ba3dc86cbaa6511cf3a8b810a589263b692be967"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/08/aa/cc0199a5f0ad350994d660967a8efb233fe0416e4639146c089643407ce6/packaging-24.1-py3-none-any.whl",
+                    "sha256": "5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124"
+                }
+            ]
+        },
+        {
+            "name": "python3-pyinstaller",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"pyinstaller==6.10.0\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/4d/3f/3bc3f1d83f6e4a7fcb834d3720544ca597590425be5ba9db032b2bf322a2/altgraph-0.17.4-py2.py3-none-any.whl",
+                    "sha256": "642743b4750de17e655e6711601b077bc6598dbfa3ba5fa2b2a35ce12b508dff"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/08/aa/cc0199a5f0ad350994d660967a8efb233fe0416e4639146c089643407ce6/packaging-24.1-py3-none-any.whl",
+                    "sha256": "5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/5c/df/30b1f66d35defa37e676556acca4eb775b49637bb73054b0c31af134cd8a/pyinstaller-6.10.0.tar.gz",
+                    "sha256": "143840f8056ff7b910bf8f16f6cd92cc10a6c2680bb76d0a25d558d543d21270"
+                },
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/a0/8f/a7eb7b85ea2015d1c9a8c1686eaeb61f3ce35e1047fc03c0ac71d22d68f2/pyinstaller_hooks_contrib-2024.8-py3-none-any.whl",
+                    "sha256": "0057fe9a5c398d3f580e73e58793a1d4a8315ca91c3df01efea1c14ed557825a"
+                }
+            ]
+        },
+        {
+            "name": "python3-sv-ttk",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"sv-ttk==2.6.0\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/0f/3d/be0abc3202e90f282ad465f4e7c6e41bc8dce810ce5d1611566a1e7dfba8/sv_ttk-2.6.0-py3-none-any.whl",
+                    "sha256": "4319c52edf2e14732fe84bdc9788e26f9e9a1ad79451ec0f89f0120ffc8105d9"
+                }
+            ]
+        }
+    ]
+}
