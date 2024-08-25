@@ -15,12 +15,11 @@ done
 download_url="$(curl -s https://api.github.com/repos/yoyoengine/launcher/releases/latest | grep -o "https://github.com/yoyoengine/launcher/releases/download/.*/yoyoengine-hub-linux-amd64.tar.gz")"
 curl -LO "$download_url"
 
-# Extract the contents of the tar.gz file
-tar -xf yoyoengine-hub-linux-amd64.tar.gz -C /tmp/
-
 # Move the ELF file to the bin directory
 bin_directory="$(dirname "$(which curl)")"
-mv /tmp/yoyoengine-hub/yoyoengine-hub "$bin_directory/"
+
+# Extract the contents of the tar.gz file
+tar -xf yoyoengine-hub-linux-amd64.tar.gz -C "$bin_directory"
 
 # Set the executable permission for the ELF file
 chmod +x "$bin_directory/yoyoengine-hub"
@@ -33,7 +32,6 @@ mv yoyoengine-hub.png "$icon_directory/"
 
 # Clean up the downloaded tar.gz file and extracted directory
 rm yoyoengine-hub-linux-amd64.tar.gz
-rm -rf /tmp/yoyoengine-hub/
 
 # Create a .desktop file
 desktop_file="$HOME/.local/share/applications/yoyoengine-hub.desktop"
