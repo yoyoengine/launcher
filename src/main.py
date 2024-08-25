@@ -1,5 +1,5 @@
 """
-    This file is a part of yoyoengine. (https://github.com/zoogies/yoyoengine)
+    This file is a part of yoyoengine. (https://github.com/yoyoengine/yoyoengine)
     Copyright (C) 2024  Ryan Zmuda
 
     Licensed under the MIT license. See LICENSE file in the project root for details.

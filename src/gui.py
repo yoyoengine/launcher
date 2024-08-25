@@ -1,5 +1,5 @@
 """
-    This file is a part of yoyoengine. (https://github.com/zoogies/yoyoengine)
+    This file is a part of yoyoengine. (https://github.com/yoyoengine/yoyoengine)
     Copyright (C) 2024  Ryan Zmuda
 
     Licensed under the MIT license. See LICENSE file in the project root for details.
@@ -44,7 +44,7 @@ def time_ago(timestamp_str):
         return "just now"
 
 class YoyoEngineHub:
-    def __init__(self, version, is_release, hub_api_url="https://api.github.com/repos/yoyoengine/launcher", engine_api_url="https://api.github.com/repos/zoogies/yoyoengine"):
+    def __init__(self, version, is_release, hub_api_url="https://api.github.com/repos/yoyoengine/launcher", engine_api_url="https://api.github.com/repos/yoyoengine/yoyoengine"):
         self.notifier = DesktopNotifierSync(app_name="YoyoEngine Hub")
         self.root = tk.Tk()
         self.root.geometry("1280x720")
@@ -322,7 +322,7 @@ class YoyoEngineHub:
                 install_button = ttk.Button(buttons_frame, text="Open", command=lambda version=version: self.backend.open_editor(version))
                 install_button.pack(side="left", padx=5)
                 
-                release_notes_button = ttk.Button(buttons_frame, text="Docs", command=lambda url="https://zoogies.github.io/yoyoengine/": webbrowser.open(url))
+                release_notes_button = ttk.Button(buttons_frame, text="Docs", command=lambda url="https://yoyoengine.github.io/yoyoengine/": webbrowser.open(url))
                 release_notes_button.pack(side="left", padx=5)
 
                 def handle_uninstall(version):
