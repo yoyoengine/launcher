@@ -10,9 +10,16 @@
 from gui import YoyoEngineHub
 
 # semver for hub
-VERSION = "v1.3" # TODO: fix before release
+VERSION = "v1.0.0"
+RELEASE = True
 
 if __name__ == "__main__":
+
+    # check for --dev
+    import sys
+    if "--dev" in sys.argv:
+        RELEASE = False
+
     # TODO: gui sometime in the future
-    gui = YoyoEngineHub(VERSION)
+    gui = YoyoEngineHub(VERSION, RELEASE)
     gui.run()

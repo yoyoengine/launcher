@@ -16,20 +16,27 @@ def detect_platform():
     return platform.system()
 
 class YoyoEngineHubBackend:
-    def __init__(self, version):
+    def __init__(self, version, hub_api_url, engine_api_url):
         self.platform = detect_platform()
         self.version = version
 
-        # self.engine_api_url = "https://api.github.com/repos/yoyoengine/launcher"
-        self.engine_api_url = "https://api.github.com/repos/zoogies/Boneworks-Save-Manager"
-        # self.hub_api_url = "https://api.github.com/repos/yoyoengine/launcher"
-        self.hub_api_url = "https://api.github.com/repos/zoogies/Boneworks-Save-Manager"
+        self.hub_api_url = hub_api_url
+        self.engine_api_url = engine_api_url
+
+        self.available_cache = None
+        self.update_hub_cache = None
 
     def check_for_hub_update(self) -> bool:
         # check the most recent release of yoyoengine and get its tag
         # compare the tag to the current version of the hub (ex: build 0 vs build 1)
+
+        if(self.update_hub_cache is not None):
+            return self.update_hub_cache
+
         res = json.loads(requests.get(f"{self.hub_api_url}/releases").text)
         latest_release_tag = res[0]['tag_name']
+
+        self.update_hub_cache = (latest_release_tag != self.version)
 
         if latest_release_tag != self.version:
             print(f"New version of the hub available: {latest_release_tag}")
@@ -54,6 +61,10 @@ class YoyoEngineHubBackend:
 
     def check_remote_versions(self):
         # get all releases
+
+        if(self.available_cache is not None):
+            return self.available_cache
+
         res = json.loads(requests.get(f"{self.engine_api_url}/releases").text)
         versions = []
         for release in res:
@@ -62,6 +73,9 @@ class YoyoEngineHubBackend:
                 "url": release['html_url'],
                 "date": release['published_at']
             })
+        
+        self.available_cache = versions
+
         return versions
 
     def check_installed_versions(self):
@@ -110,8 +124,7 @@ class YoyoEngineHubBackend:
         os.makedirs(tag_dir, exist_ok=True)
 
         # Download the tarball
-        # r = requests.get(download_url)
-        r = requests.get("https://api.github.com/repos/zoogies/Boneworks-Save-Manager/tarball/v1.0")
+        r = requests.get(download_url)
         tar = tarfile.open(fileobj=io.BytesIO(r.content))
         
         try:
@@ -131,14 +144,7 @@ class YoyoEngineHubBackend:
     def uninstall_editor(self, version):
         import shutil
         shutil.rmtree(version['path'])
-
-"""
-    Spec:
-    Linux:
-        ~/.local/share/yoyoengine/ has
-        /VERSION_NAME
-        /VERSION_NAME
-        for each editor installed
-
-        inside of each is the full install for that version
-"""
+    
+    def uninstall_everything(self):
+        import shutil
+        shutil.rmtree(os.path.expanduser("~/.local/share/yoyoengine"))

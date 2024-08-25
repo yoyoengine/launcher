@@ -1,39 +1,57 @@
 # yoyoengine hub
 
-The hub is a proposed central manager of yoyoengine versions.
+![GitHub Release](https://img.shields.io/github/v/release/yoyoengine/launcher)
+![GitHub License](https://img.shields.io/github/license/yoyoengine/launcher)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/yoyoengine/launcher/total)
 
-## Usage
+The yoyoengine hub (or launcher) is a clean standalone gui which allows you to manage multiple yoyoeditor installs.
 
-The hub will provide a gui to see and manage yoyoeditor installs.
+![Image of the yoyoengine hub](.github/media/gui_example.png)
 
-Each yoyoeditor install has its own folder in a managed location, and its own list of projects to sandbox and seperate projects across your versions.
+## Installation
 
-## Distribution
+Pick one of the following:
 
-The hub will be built by pyinstaller, and distributed as a single executable file.
+### Flatpak
 
-## Considerations
-
-- add version tracking into the yoyoengine projects themselves
-- add concrete version checking functions into editor (build X.X)
-
-## Development
-
-Build final output:
+Assuming you have flatpak, curl, and jq installed, you can install the latest release with the following command:
 
 ```bash
-pyinstaller --onefile --collect-data sv_ttk src/main.py
+flatpak install --user $(curl -s https://api.github.com/repos/yoyoengine/launcher/releases/latest | jq -r '.assets[] | select(.name | endswith(".flatpak")) | .browser_download_url') --no-yes
 ```
 
-## stipulations
+### Standalone
 
-yoyoeditor build releases are expected to have a yoyoeditor**.tar.gz file in the assets, which is what should be actually installed into the new directory.
+You can download the latest release from the [releases page](https://github.com/yoyoengine/launcher/releases/latest).
 
-yoyoeditor builds are not nested in a subdir, if you extract, yoyoeditor is at the root
+Alternatively, here is a one liner to download and install the latest release:
 
-## todo
+```bash
+curl -L $(curl -s https://api.github.com/repos/yoyoengine/launcher/releases/latest | jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url') | tar -xz -C ~/.local/bin
+```
 
-add settings page to cleanup all installs
-some kinda menu that shows during install, uninstall to show progress
-maybe replace the hub update available since its trash
-add github cicd to build hub
+This will place yoyoengine-hub in `~/.local/bin`, so to run it you can just run `yoyoengine-hub` from the terminal.
+
+### Build from source
+
+Assuming you have python3 and pip3, you can run the following commands:
+
+```bash
+git clone https://github.com/yoyoengine/launcher.git
+
+cd launcher
+
+pip install -r requirements.txt
+
+pyinstaller --onefile --name yoyoengine-hub --collect-data sv_ttk --collect-data desktop_notifier --icon media/yoyoengine.ico --add-data "media/smallcleanlogo.png:." --add-data "media/cleanlogo.png:." --add-data "media/smallesttextlogo.png:." src/main.py
+```
+
+From there, you have a single elf binary in the `dist` directory.
+
+## Running development build
+
+Make sure you run from outside the source dir, with `--dev` as a cli arg to `main.py`.
+
+```bash
+python src/main.py --dev
+```

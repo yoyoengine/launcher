@@ -1,1 +1,7 @@
 __pycache__
+*.spec
+dist
+build
+.flatpak-builder
+builddir
+repo

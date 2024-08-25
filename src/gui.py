@@ -14,6 +14,8 @@ from desktop_notifier import DesktopNotifier, Icon
 from desktop_notifier.sync import DesktopNotifierSync
 
 import asyncio
+import os
+import sys
 
 from datetime import datetime, timezone
 from dateutil import parser
@@ -42,21 +44,37 @@ def time_ago(timestamp_str):
         return "just now"
 
 class YoyoEngineHub:
-    def __init__(self, version):
+    def __init__(self, version, is_release, hub_api_url="https://api.github.com/repos/yoyoengine/launcher", engine_api_url="https://api.github.com/repos/zoogies/yoyoengine"):
         self.notifier = DesktopNotifierSync(app_name="YoyoEngine Hub")
         self.root = tk.Tk()
         self.root.geometry("1280x720")
         self.root.title("YoyoEngine Hub")
-        self.root.tk.call('wm', 'iconphoto', self.root._w, tk.PhotoImage(file='../media/cleanlogo.png'))
         self.tab = "editors"
-        self.backend = YoyoEngineHubBackend(version)
+        self.version = version
+        self.backend = YoyoEngineHubBackend(version, hub_api_url, engine_api_url)
 
         try:
             self.update_available = self.backend.check_for_hub_update()
         except Exception as e:
             self.update_available = False
 
-        self.version_logo = tk.PhotoImage(file="../media/smallcleanlogo.png")
+        self.is_release = is_release
+
+        def path(src):
+            if self.is_release:
+                try:
+                    base_path = sys._MEIPASS
+                except Exception:
+                    base_path = os.path.abspath(".")
+
+                return os.path.join(base_path, src)
+            else:
+                # return f"../media/{src}"
+                return f"media/{src}"
+
+        self.version_logo = tk.PhotoImage(file=path("smallcleanlogo.png"))
+        self.smallesttextlogo = tk.PhotoImage(file=path("smallesttextlogo.png"))
+        self.root.tk.call('wm', 'iconphoto', self.root._w, tk.PhotoImage(file=path('cleanlogo.png')))
 
         if self.update_available:
             self.show_update_notification()
@@ -106,6 +124,8 @@ class YoyoEngineHub:
 
         if self.tab == "editors":
             self.populate_editors_tab()
+        elif self.tab == "settings":
+            self.populate_settings_tab()
 
     def configure_root_grid(self):
         self.root.columnconfigure(0, weight=1)
@@ -116,10 +136,13 @@ class YoyoEngineHub:
     def create_top_bar(self):
         self.top_bar = tk.Frame(self.root)
         self.top_bar.grid(row=0, column=0, columnspan=2, sticky="ew")
-        self.top_bar.columnconfigure(0, weight=1)
-        self.logo = tk.PhotoImage(file="../media/smallesttextlogo.png")
-        self.logo_label = tk.Label(self.top_bar, image=self.logo)
+        # self.top_bar.columnconfigure(0, weight=1)
+        self.logo_label = tk.Label(self.top_bar, image=self.smallesttextlogo)
         self.logo_label.grid(row=0, column=0, pady=0, padx=10, sticky="nw")
+
+        # to the right of this logo, aligned to the bottom we want version text self.version
+        self.version_label = tk.Label(self.top_bar, text=f"hub {self.version}", fg="white", font=("Roboto", 10))
+        self.version_label.grid(row=0, column=1, pady=0, padx=10, sticky="w")
 
     def create_left_menu(self):
         self.left_menu = tk.Frame(self.root)
@@ -152,8 +175,9 @@ class YoyoEngineHub:
         self.settings_btn.grid(row=1, column=0, pady=20, padx=20, sticky="nsew")
 
     def create_footer(self):
-        self.create_label(self.left_menu, "Ryan Zmuda © 2024", 3)
-        self.create_label(self.left_menu, "Licensed under the MIT license.", 4)
+        # self.create_label(self.left_menu, f'hub {self.version}', 3)
+        self.create_label(self.left_menu, "Ryan Zmuda © 2024", 4)
+        self.create_label(self.left_menu, "Licensed under the MIT license.", 5)
         self.create_report_problem_label()
 
     def create_label(self, parent, text, row):
@@ -165,7 +189,7 @@ class YoyoEngineHub:
             webbrowser.open("https://github.com/yoyoengine/launcher/issues")
 
         report_label = tk.Label(self.left_menu, text="Report a problem", fg="cyan", cursor="hand2")
-        report_label.grid(row=5, column=0, pady=(0, 20), padx=30, sticky="sew")
+        report_label.grid(row=6, column=0, pady=(0, 20), padx=30, sticky="sew")
         report_label.bind("<Button-1>", lambda e: report_problem())
 
     def create_content_area(self):
@@ -315,6 +339,20 @@ class YoyoEngineHub:
     def populate_editors_tab(self):
         self.populate_installed_editors()
         self.populate_available_editors()
+
+    def populate_settings_tab(self):
+        label = tk.Label(self.scrollable_frame, text="Settings", bg="#171617", fg="white", font=("Roboto", 18))
+        label.pack(fill="x", pady=10)
+
+        # uninstall everything
+        def uninstall_all():
+            self.backend.uninstall_everything()
+            self.notifier.send("YoyoEngine Hub", "All editors have been uninstalled.", icon=Icon(name="../media/smallcleanlogo.png"))
+            self.clear()
+            self.hub()
+        
+        uninstall_button = tk.Button(self.scrollable_frame, text="Uninstall All", command=uninstall_all, bg="#ff0000", fg="white")
+        uninstall_button.pack(pady=10)
 
     def clear(self):
         for widget in self.root.winfo_children():
