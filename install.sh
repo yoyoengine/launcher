@@ -16,7 +16,8 @@ download_url="$(curl -s https://api.github.com/repos/yoyoengine/launcher/release
 curl -LO "$download_url"
 
 # Move the ELF file to the bin directory
-bin_directory="$(dirname "$(which curl)")"
+bin_directory="/usr/local/bin"
+mkdir -p "$bin_directory"
 
 # Extract the contents of the tar.gz file
 tar -xf yoyoengine-hub-linux-amd64.tar.gz -C "$bin_directory"
@@ -25,26 +26,37 @@ tar -xf yoyoengine-hub-linux-amd64.tar.gz -C "$bin_directory"
 chmod +x "$bin_directory/yoyoengine-hub"
 
 # Move the icon to the appropriate directory
-icon_directory="$HOME/.local/share/icons/hicolor/512x512"
+icon_directory="/usr/share/icons/hicolor/256x256/apps"
 mkdir -p "$icon_directory"
-curl -LO "https://github.com/yoyoengine/launcher/raw/6f036095e0da8bd1f178fcc3261b43d61f5b6d07/media/yoyoengine-hub.png"
-mv yoyoengine-hub.png "$icon_directory/"
+curl https://raw.githubusercontent.com/yoyoengine/launcher/main/media/desktopicon.png > desktopicon.png
+mv desktopicon.png "$icon_directory/yoyoengine-hub.png"
 
 # Clean up the downloaded tar.gz file and extracted directory
 rm yoyoengine-hub-linux-amd64.tar.gz
 
+# Ensure the applications directory exists
+desktop_directory="/usr/share/applications"
+mkdir -p "$desktop_directory"
+
 # Create a .desktop file
-desktop_file="$HOME/.local/share/applications/yoyoengine-hub.desktop"
+desktop_file="$desktop_directory/yoyoengine-hub.desktop"
 cat > "$desktop_file" << EOL
 [Desktop Entry]
 Name=YoyoEngine Hub
-Exec=$bin_directory/yoyoengine-hub
+Comment=The launcher and installation manager for yoyoengine.
 Icon=$icon_directory/yoyoengine-hub.png
+Exec=$bin_directory/yoyoengine-hub
 Terminal=false
 Type=Application
+Categories=Utility;Development;
 EOL
+# Icon=/usr/share/icons/hicolor/128x128/apps/ark.png
+
+# Ensure the .desktop file is executable
+chmod +x "$desktop_file"
+
 # Update the desktop database
-update-desktop-database "$HOME/.local/share/applications"
+update-desktop-database "$desktop_directory"
 
 # Display a success message
 echo "YoyoEngine Hub has been successfully installed."

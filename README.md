@@ -19,14 +19,16 @@ I've created a bash script `install.sh` which will handle downloading and creati
 You can run it from your terminal with the following command:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/yoyoengine/launcher/main/install.sh | bash
+sudo curl -sL https://raw.githubusercontent.com/yoyoengine/launcher/main/install.sh | bash
 ```
 
 If you wish to later uninstall, you can run the following command:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/yoyoengine/launcher/main/uninstall.sh | bash
+sudo curl -sL https://raw.githubusercontent.com/yoyoengine/launcher/main/uninstall.sh | bash
 ```
+
+These scripts need sudo because they touch `/usr/bin` and `/usr/share/applications`. If this is scary for you, please check out the source code before running :)
 
 ### Standalone
 
@@ -35,7 +37,7 @@ You can download the latest release from the [releases page](https://github.com/
 Alternatively, here is a one liner to download and install the latest release:
 
 ```bash
-curl -L $(curl -s https://api.github.com/repos/yoyoengine/launcher/releases/latest | jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url') | tar -xz -C ~/.local/bin
+sudo curl -L $(curl -s https://api.github.com/repos/yoyoengine/launcher/releases/latest | jq -r '.assets[] | select(.name | endswith(".tar.gz")) | .browser_download_url') | tar -xz -C ~/.local/bin
 ```
 
 This will place yoyoengine-hub in `~/.local/bin`, so to run it you can just run `yoyoengine-hub` from the terminal.

@@ -2,37 +2,46 @@
 
 echo "Uninstalling YoyoEngine Hub..."
 
-# Define paths
-bin_directory="$(dirname "$(which curl)")"
-icon_directory="$HOME/.local/share/icons/hicolor/512x512"
-desktop_file="$HOME/.local/share/applications/yoyoengine-hub.desktop"
-
-# Remove the executable file
-if [ -f "$bin_directory/yoyoengine-hub" ]; then
-    rm "$bin_directory/yoyoengine-hub"
-    echo "Removed executable from $bin_directory"
-else
-    echo "Executable not found in $bin_directory"
+# Check for root privileges
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root" 
+    exit 1
 fi
 
-# Remove the icon file
-if [ -f "$icon_directory/yoyoengine-hub.png" ]; then
-    rm "$icon_directory/yoyoengine-hub.png"
-    echo "Removed icon from $icon_directory"
+# Define directories and files
+bin_directory="/usr/local/bin"
+icon_directory="/usr/share/icons/hicolor/512x512/apps"
+desktop_directory="/usr/share/applications"
+executable="$bin_directory/yoyoengine-hub"
+icon="$icon_directory/yoyoengine-hub.png"
+desktop_file="$desktop_directory/yoyoengine-hub.desktop"
+
+# Remove the executable
+if [[ -f "$executable" ]]; then
+    rm "$executable"
+    echo "Removed $executable"
 else
-    echo "Icon not found in $icon_directory"
+    echo "$executable not found"
+fi
+
+# Remove the icon
+if [[ -f "$icon" ]]; then
+    rm "$icon"
+    echo "Removed $icon"
+else
+    echo "$icon not found"
 fi
 
 # Remove the .desktop file
-if [ -f "$desktop_file" ]; then
+if [[ -f "$desktop_file" ]]; then
     rm "$desktop_file"
-    echo "Removed .desktop file from $desktop_file"
+    echo "Removed $desktop_file"
 else
-    echo ".desktop file not found in $desktop_file"
+    echo "$desktop_file not found"
 fi
 
 # Update the desktop database
-update-desktop-database "$HOME/.local/share/applications"
+update-desktop-database "$desktop_directory"
 
 # Display a success message
 echo "YoyoEngine Hub has been successfully uninstalled."
