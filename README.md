@@ -12,12 +12,20 @@ The yoyoengine hub (or launcher) is a clean standalone gui which allows you to m
 
 Pick one of the following:
 
-### Flatpak
+### One-liner Install (recommended)
 
-Assuming you have flatpak, curl, and jq installed, you can install the latest release with the following command:
+I've created a bash script `install.sh` which will handle downloading and creating a desktop entry for yoyoengine-hub.
+
+You can run it from your terminal with the following command:
 
 ```bash
-flatpak install --user $(curl -s https://api.github.com/repos/yoyoengine/launcher/releases/latest | jq -r '.assets[] | select(.name | endswith(".flatpak")) | .browser_download_url') --no-yes
+curl -sL https://raw.githubusercontent.com/yoyoengine/launcher/main/install.sh | bash
+```
+
+If you wish to later uninstall, you can run the following command:
+
+```bash
+curl -sL https://raw.githubusercontent.com/yoyoengine/launcher/main/uninstall.sh | bash
 ```
 
 ### Standalone
@@ -55,9 +63,3 @@ Make sure you run from outside the source dir, with `--dev` as a cli arg to `mai
 ```bash
 python src/main.py --dev
 ```
-
-## Building the flatpak from source
-
-1. Aquire [flatpak-pip-generator](https://github.com/flatpak/flatpak-builder-tools/blob/master/pip/flatpak-pip-generator)
-2. Run `python3 flatpak-pip-generator --requirements-file=requirements.txt`
-3. Run `flatpak-builder --force-clean --user --install-deps-from=flathub --repo=repo --install builddir live.zoogies.yoyoengine-hub.yaml`
