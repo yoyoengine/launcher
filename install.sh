@@ -3,7 +3,7 @@
 echo "Installing YoyoEngine Hub..."
 
 # Check dependencies
-dependencies=("curl" "tar")
+dependencies=("curl" "tar" "cmake" "gcc" "make" "zenity")
 for dependency in "${dependencies[@]}"; do
     if ! command -v "$dependency" &> /dev/null; then
         echo "Error: $dependency is not installed."

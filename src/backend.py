@@ -16,12 +16,12 @@ def detect_platform():
     return platform.system()
 
 class YoyoEngineHubBackend:
-    def __init__(self, version, hub_api_url, engine_api_url):
+    def __init__(self, version, hub_api_url, editor_api_url):
         self.platform = detect_platform()
         self.version = version
 
         self.hub_api_url = hub_api_url
-        self.engine_api_url = engine_api_url
+        self.editor_api_url = editor_api_url
 
         self.available_cache = None
         self.update_hub_cache = None
@@ -65,7 +65,7 @@ class YoyoEngineHubBackend:
         if(self.available_cache is not None):
             return self.available_cache
 
-        res = json.loads(requests.get(f"{self.engine_api_url}/releases").text)
+        res = json.loads(requests.get(f"{self.editor_api_url}/releases").text)
         versions = []
         for release in res:
             versions.append({
@@ -109,7 +109,7 @@ class YoyoEngineHubBackend:
         
             we just need to download that and extract it into the editors directory
         """
-        res = json.loads(requests.get(f"{self.engine_api_url}/releases/tags/{tag}").text)
+        res = json.loads(requests.get(f"{self.editor_api_url}/releases/tags/{tag}").text)
         assets = res['assets']
         for asset in assets:
             if "yoyoeditor-build" in asset['name'] and self.platform in asset['name']:

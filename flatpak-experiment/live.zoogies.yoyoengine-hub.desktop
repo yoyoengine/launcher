@@ -1,9 +1,0 @@
-[Desktop Entry]
-Categories=Development;
-Comment=The launcher and installation manager for yoyoengine.
-Exec=
-Icon=live.zoogies.yoyoengine-hub
-Name=yoyoengine hub
-Terminal=false
-Type=Application
-Version=1.0.0

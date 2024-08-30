@@ -6,3 +6,5 @@ build
 builddir
 repo
 flatpak-pip-generator
+venv
+*.tar.gz

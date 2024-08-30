@@ -44,14 +44,14 @@ def time_ago(timestamp_str):
         return "just now"
 
 class YoyoEngineHub:
-    def __init__(self, version, is_release, hub_api_url="https://api.github.com/repos/yoyoengine/launcher", engine_api_url="https://api.github.com/repos/yoyoengine/yoyoengine"):
+    def __init__(self, version, is_release, hub_api_url="https://api.github.com/repos/yoyoengine/launcher", editor_api_url="https://api.github.com/repos/yoyoengine/yoyoeditor"):
         self.notifier = DesktopNotifierSync(app_name="YoyoEngine Hub")
         self.root = tk.Tk()
         self.root.geometry("1280x720")
         self.root.title("YoyoEngine Hub")
         self.tab = "editors"
         self.version = version
-        self.backend = YoyoEngineHubBackend(version, hub_api_url, engine_api_url)
+        self.backend = YoyoEngineHubBackend(version, hub_api_url, editor_api_url)
 
         try:
             self.update_available = self.backend.check_for_hub_update()
@@ -322,8 +322,8 @@ class YoyoEngineHub:
                 install_button = ttk.Button(buttons_frame, text="Open", command=lambda version=version: self.backend.open_editor(version))
                 install_button.pack(side="left", padx=5)
                 
-                release_notes_button = ttk.Button(buttons_frame, text="Docs", command=lambda url="https://yoyoengine.github.io/yoyoengine/": webbrowser.open(url))
-                release_notes_button.pack(side="left", padx=5)
+                docs_button = ttk.Button(buttons_frame, text="Docs", command=lambda url="https://yoyoengine.github.io/docs/": webbrowser.open(url))
+                docs_button.pack(side="left", padx=5)
 
                 def handle_uninstall(version):
                     self.backend.uninstall_editor(version)
