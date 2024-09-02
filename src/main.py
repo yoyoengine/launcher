@@ -20,6 +20,5 @@ if __name__ == "__main__":
     if "--dev" in sys.argv:
         RELEASE = False
 
-    # TODO: gui sometime in the future
     gui = YoyoEngineHub(VERSION, RELEASE)
     gui.run()
